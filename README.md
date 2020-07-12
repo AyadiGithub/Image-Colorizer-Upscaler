@@ -1,4 +1,4 @@
-# Image-Upscaler
-Image Upscaler (Autoencdoer) with Keras
+# Image-Colorizer/Upscaler
+Image Colorizer/Upscaler
 
 ## This project is Work-in-Progress
