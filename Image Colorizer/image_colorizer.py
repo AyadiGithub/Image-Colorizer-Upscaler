@@ -257,7 +257,8 @@ def train_batches(just_load_dataset=False):
 
                       print('Training batch', batch_nb, '(', batches, ')')
 
-                      autoencoder.fit(x_train, y_train, epochs=epochs, batch_size=32, validation_split=0.10, shuffle=True)  # callbacks=[plotlosses, model_checkpoint_callback, reduce_lr]
+                      autoencoder.fit(x_train, y_train, epochs=epochs, batch_size=32, validation_split=0.10, shuffle=True)
+                      # callbacks=[plotlosses, model_checkpoint_callback, reduce_lr]
 
                       x_train_orig = []
                       y_train_orig = []
