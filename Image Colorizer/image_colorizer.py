@@ -42,61 +42,71 @@ np.random.seed(0)
 # Input layer will be 256x256x1 (Grayscale LAB Image)
 input_img = Input(shape=(256, 256, 1))  # Using Input class from Keras
 
-layer1 = Conv2D(64, (3, 3),
+layer1 = Conv2D(128, (3, 3),
                 padding='same',
                 activation='relu',
                 kernel_initializer='he_normal',
-                activity_regularizer=regularizers.l1(10e-10))(input_img)  # Applied to the output of previous layer
+                kernel_regularizer=regularizers.l2(10e-7))(input_img)  # Applied to the output of previous layer
 
 
 layerm1 = MaxPooling2D(padding='same')(layer1)  # MaxPooling over previous layer output
+
 
 layer2 = Conv2D(128, (3, 3),
                 padding='same',
                 activation='relu',
                 kernel_initializer='he_normal',
-                activity_regularizer=regularizers.l1(10e-10))(layerm1)  # Applied to the output of previous layer
-
+                kernel_regularizer=regularizers.l2(10e-7))(layerm1)   # Applied to the output of previous layer
 
 layer3 = Conv2D(128, (3, 3),
                 padding='same',
                 activation='relu',
                 kernel_initializer='he_normal',
-                activity_regularizer=regularizers.l1(10e-10))(layer2)  # Applied to the output of previous layer
+                kernel_regularizer=regularizers.l2(10e-7))(layer2)   # Applied to the output of previous layer
 
 layerm2 = MaxPooling2D(padding='same')(layer3)  # MaxPooling over previous layer output
 
-layer4 = Conv2D(256, (3, 3),
+layer4 = Conv2D(128, (3, 3),
                 padding='same',
                 activation='relu',
                 kernel_initializer='he_normal',
-                activity_regularizer=regularizers.l1(10e-10))(layerm2)   # Applied to the output of previous layer
+                kernel_regularizer=regularizers.l2(10e-7))(layerm2)  # Applied to the output of previous layer
 
 
 layer5 = Conv2D(256, (3, 3),
                 padding='same',
                 activation='relu',
                 kernel_initializer='he_normal',
-                activity_regularizer=regularizers.l1(10e-10))(layer4)  # Applied to the output of previous layer
+                kernel_regularizer=regularizers.l2(10e-7))(layer4)  # Applied to the output of previous layer
 
-
-layerm3 = MaxPooling2D(padding='same')(layer5)  # MaxPooling over previous layer output
-
-layer6 = Conv2D(512, (3, 3),
+layer6 = Conv2D(256, (3, 3),
                 padding='same',
                 activation='relu',
                 kernel_initializer='he_normal',
-                activity_regularizer=regularizers.l1(10e-10))(layerm3)  # Applied to the output of previous layer
+                kernel_regularizer=regularizers.l2(10e-7))(layer5)  # Applied to the output of previous layer
 
+layerm3 = MaxPooling2D(padding='same')(layer6)  # MaxPooling over previous layer output
 
-layer7 = Conv2D(512, (3, 3),
+layer7 = Conv2D(256, (3, 3),
                 padding='same',
                 activation='relu',
                 kernel_initializer='he_normal',
-                activity_regularizer=regularizers.l1(10e-10))(layer6)  # Applied to the output of previous layer
+                kernel_regularizer=regularizers.l2(10e-7))(layerm3)  # Applied to the output of previous layer
+
+layer8 = Conv2D(512, (3, 3),
+                padding='same',
+                activation='relu',
+                kernel_initializer='he_normal',
+                kernel_regularizer=regularizers.l2(10e-7))(layer7)  # Applied to the output of previous layer
+
+layer9 = Conv2D(512, (3, 3),
+                padding='same',
+                activation='relu',
+                kernel_initializer='he_normal',
+                kernel_regularizer=regularizers.l2(10e-7))(layer8)  # Applied to the output of previous layer
 
 # Model class from keras to put the model together
-encoder = Model(input_img, layer7)
+encoder = Model(input_img, layer9)
 
 # Encoder model summary
 encoder.summary()
@@ -105,45 +115,56 @@ encoder.summary()
 
 # Reverse the Encoder for the Decoder
 
-layer8 = Conv2DTranspose(256, (3, 3),
+layer10 = Conv2DTranspose(256, (3, 3),
                          strides=(2, 2),
                          padding='same',
                          activation='relu',
                          kernel_initializer='he_normal',
-                         activity_regularizer=regularizers.l1(10e-10))(layer7)  # Applied to the output of previous layer
+                         kernel_regularizer=regularizers.l2(10e-7))(layer9)  # Applied to the output of previous layer
 
-layeradd = add([layer8, layer4])  # Add features from encoder layer to decoder layer
+layeradd = add([layer10, layer6])  # Add features from encoder layer to decoder layer
 
+layer11 = Conv2D(256, (3, 3),
+                padding='same',
+                activation='relu',
+                kernel_initializer='he_normal',
+                kernel_regularizer=regularizers.l2(10e-7))(layeradd)
 
-layer9 = Conv2DTranspose(128, (3, 3),
+layer12 = Conv2DTranspose(128, (3, 3),
                          strides=(2, 2),
                          padding='same',
                          activation='relu',
                          kernel_initializer='he_normal',
-                         activity_regularizer=regularizers.l1(10e-10))(layeradd)  # Applied to the output of previous layer
+                         kernel_regularizer=regularizers.l2(10e-7))(layer11)  # Applied to the output of previous layer
 
-layeradd1 = add([layer9, layer2])  # Add features from encoder layer to decoder layer
+layeradd1 = add([layer12, layer3])  # Add features from encoder layer to decoder layer
 
-layer10 = Conv2DTranspose(64, (3, 3),
+layer13 = Conv2D(128, (3, 3),
+                padding='same',
+                activation='relu',
+                kernel_initializer='he_normal',
+                kernel_regularizer=regularizers.l2(10e-7))(layeradd1)
+
+layer14 = Conv2DTranspose(128, (3, 3),
                           strides=(2, 2),
                           padding='same',
                           activation='relu',
                           kernel_initializer='he_normal',
-                          activity_regularizer=regularizers.l1(10e-10))(layeradd1)  # Applied to the output of previous layer
+                          kernel_regularizer=regularizers.l2(10e-7))(layer13)  # Applied to the output of previous layer
 
-layeradd2 = add([layer10, layer1])  # Add features from encoder layer to decoder layer
+layeradd2 = add([layer14, layer1])  # Add features from encoder layer to decoder layer
 
-layer11 = Conv2D(32, (3, 3),
+layer15 = Conv2D(64, (3, 3),
                  padding='same',
                  activation='relu',
                  kernel_initializer='he_normal',
-                 activity_regularizer=regularizers.l1(10e-10))(layeradd2)  # Applied to the output of previous layer
+                 kernel_regularizer=regularizers.l2(10e-7))(layeradd2)  # Applied to the output of previous layer
 
 # Decoder output, 2 channels for colored LAB Image
 decoder = Conv2D(2, (3, 3),
                  padding='same',
                  activation='tanh',
-                 kernel_initializer='glorot_normal')(layer11)  # Applied to the output of previous layer
+                 kernel_initializer='glorot_normal')(layer15)  # Applied to the output of previous layer
 
 # In[5]: Encoder + Decoder
 
@@ -162,14 +183,20 @@ autoencoder.summary()
 
 # In[7]: Loss function
 
-# Custom Loss function Average SSIM (structural similarity index measure) LOSS
+# Combined Loss function Average SSIM and MSE
+# Alpha is the weight attributed to the loss function
+alpha = 0.10
 
 
-def dssimloss(y_true, y_pred):
-    ssim = tf.image.ssim(y_true, y_pred, 2.0)
+def CustomLoss(y_true, y_pred):
+    ssim = tf.image.ssim(y_true, y_pred, 1.0)
+    dssim = backend.mean(1 - ssim)
+    mse = backend.mean(backend.square(y_true - y_pred), axis=-1)
+    loss = (alpha*dssim)+((1-alpha)*mse)
 
-    return backend.mean(1 - ssim)
+    return loss
 
+  
 # In[8]
 
 # Plotting during training using livelossplot Library
