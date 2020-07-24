@@ -235,7 +235,7 @@ def PSNR(y_true, y_pred):
 # reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=20, min_lr=1e-6, mode='min')
 
 
-autoencoder.compile(optimizer='adam', loss=dssimloss)
+autoencoder.compile(optimizer='adam', loss=CustomMultiSSIMMAE, metrics=[PSNR])
 
 # Checkpoint to save best weights
 
