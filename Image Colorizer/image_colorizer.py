@@ -181,20 +181,46 @@ autoencoder.summary()
 # autoencoder.load_weights(r'C:\autoencoder_weightsv.h5')
 # encoder.load_weights(r'C:\encoder_weightsv.h5')
 
-# In[7]: Loss function
+# In[7]: Custom Loss functions and Metrics
 
-# Combined Loss function Average SSIM and MSE
-# Alpha is the weight attributed to the loss function
-alpha = 0.10
+# Combined Loss function use MultiSSIM/SSIM and MSE/MAE
+# alpha is the adjustable weight attributed to the loss function
+# alpha is needed to balance the errors.
 
+alpha = 0.15
 
-def CustomLoss(y_true, y_pred):
+def CustomLossSSIMMSE(y_true, y_pred):
     ssim = tf.image.ssim(y_true, y_pred, 1.0)
-    dssim = backend.mean(1 - ssim)
-    mse = backend.mean(backend.square(y_true - y_pred), axis=-1)
+    dssim = tf.math.reduce_mean(1 - ssim)
+    mse = tf.keras.losses.MSE(y_true, y_pred)
     loss = (alpha*dssim)+((1-alpha)*mse)
 
     return loss
+
+
+def CustomSSIMMAE(y_true, y_pred):
+    ssim = tf.image.ssim(y_true, y_pred, 1.0)
+    dssim = tf.math.reduce_mean(1 - ssim)
+    mae = tf.keras.losses.MAE(y_true, y_pred)
+    loss = (alpha*dssim)+((1-alpha)*mae)
+
+    return loss
+
+
+def CustomMultiSSIMMAE(y_true, y_pred):
+    multissim = tf.image.ssim_multiscale(y_true, y_pred, max_val=255)
+    dmultissim = tf.math.reduce_mean(1 - multissim)
+    mae = tf.keras.losses.MAE(y_true, y_pred)
+    loss = (alpha*dmultissim)+((1-alpha)*mae)
+
+    return loss
+
+
+def PSNR(y_true, y_pred):
+    psnr = tf.math.reduce_mean(tf.image.psnr(y_true, y_pred, max_val=1.0))
+
+    return psnr
+
 
   
 # In[8]
