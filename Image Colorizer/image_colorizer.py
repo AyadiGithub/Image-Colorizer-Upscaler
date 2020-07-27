@@ -177,9 +177,9 @@ autoencoder.summary()
 # In[6]: if Model already trained
 
 # To load trained model or Network weights
-# autoencoder = tf.keras.models.load_model(r'C:\Colorizer.h5')
-# autoencoder.load_weights(r'C:\autoencoder_weightsv.h5')
-# encoder.load_weights(r'C:\encoder_weightsv.h5')
+# autoencoder = tf.keras.models.load_model(path)
+# autoencoder.load_weights(path)
+# encoder.load_weights(path)
 
 # In[7]: Custom Loss functions and Metrics
 
@@ -239,7 +239,7 @@ autoencoder.compile(optimizer='adam', loss=CustomMultiSSIMMAE, metrics=[PSNR])
 
 # Checkpoint to save best weights
 
-# checkpoint_filepath = r'C:\Colorizer\checkpoints'
+# checkpoint_filepath = (path)
 # model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
 #     filepath=checkpoint_filepath,
 #     save_weights_only=True,
@@ -277,7 +277,7 @@ def train():
     y_train = []
 
     # Dataset Path
-    data_set_path = r'C:\Users\Desktop\Desktop\Artificial Intelligence Main\Projects\DatasetV1'
+    data_set_path = (path)
 
     for dirpath, dirnames, filenames in os.walk(data_set_path):
 
