@@ -253,21 +253,22 @@ autoencoder.compile(optimizer='adam', loss=CustomMultiSSIMMAE, metrics=[PSNR])
 # Train function
 
 
-def train_batches(just_load_dataset=False):
+def train():
 
     # Training on Tesla P-100 (16GB VRAM)
-    # Batch size
-    batches = 64
+
+    # Images to load per batch
+    per_batch = 144
     # point in current batch
     batch = 0
 
     # Current batch number
-    batch_nb = 0
+    current_batch = 0
 
     max_batches = -1  # No limit to number of batches
 
     # number of epochs
-    epochs = 50
+    epochs = 25
 
     x_train_orig = []
     y_train_orig = []
@@ -276,13 +277,13 @@ def train_batches(just_load_dataset=False):
     y_train = []
 
     # Dataset Path
-    data_set_path = (path)
+    data_set_path = r'C:\Users\Desktop\Desktop\Artificial Intelligence Main\Projects\DatasetV1'
 
     for dirpath, dirnames, filenames in os.walk(data_set_path):
 
         for filename in filenames:
             if re.search("\.(jpg|jpeg|JPEG|png)$", filename):
-                if batch_nb == max_batches:
+                if current_batch == max_batches:
                     return x_train, y_train
 
                 filepath = os.path.join(dirpath, filename)  # set path for each image
@@ -297,21 +298,17 @@ def train_batches(just_load_dataset=False):
                   y_train_orig.append(image_resized[:,:,1:] / 128)
                   batch += 1
 
-                  if batch == batches:
+                  if batch == per_batch:
 
-                      batch_nb += 1
+                      current_batch += 1
 
                       y_train = np.array(y_train_orig)  # Convert to numpy array
                       x_train = np.array(x_train_orig)  # Convert to numpy array
                       x_train = x_train.reshape(x_train.shape+(1,))  # Reshape
 
-                      if just_load_dataset:  # If just_load_dataset is set to True
-                          return x_train , y_train  # return arrays
+                      print('Current Training batch: ', current_batch, '(', per_batch, ')')
 
-                      print('Training batch', batch_nb, '(', batches, ')')
-
-                      autoencoder.fit(x_train, y_train, epochs=epochs, batch_size=32, validation_split=0.10, shuffle=True)
-                      # callbacks=[plotlosses, model_checkpoint_callback, reduce_lr]
+                      autoencoder.fit(x_train, y_train, epochs=epochs, batch_size=24, validation_split=0.10, shuffle=True)  # callbacks=[plotlosses, model_checkpoint_callback, reduce_lr]
 
                       x_train_orig = []
                       y_train_orig = []
@@ -340,25 +337,23 @@ encoder.save_weights(path)
 # Test images to evaluate the model
 image = img_to_array(load_img(path)
 image = resize(image, (256, 256))
-colored = []
-colored.append(image)
+uncolored = []
+uncolored.append(image)
 
-colored = np.array(colored, dtype=float)
-colored = rgb2lab(1.0/255*colored)[:, :, :, 0]
-colored = colored.reshape(colored.shape+(1,))
+uncolored = np.array(uncolored)
+uncolored = rgb2lab(1.0/255*uncolored)[:, :, :, 0]
+uncolored = uncolored.reshape(uncolored.shape+(1,))
 
-# Autoencoder prediction
-output = autoencoder.predict(colored)
+output = autoencoder.predict(uncolored)
 output = output*128
 
 prediction = np.zeros((256, 256, 3))
-prediction[:, :, 0] = colored[0][:, :, 0]
+prediction[:, :, 0] = uncolored[0][:, :, 0]
 prediction[:, :, 1:] = output[0]
-
 # Convert Image from LAB to RGB
 result = lab2rgb(prediction)
 
 # Rescaling Image
 result = rescale(result, 2.0, multichannel=True)
 plt.imshow(result)
-# imsave("result.jpg", lab2rgb(result))
+
